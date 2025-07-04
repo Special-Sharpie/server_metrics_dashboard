@@ -1,33 +1,35 @@
 <template>
-  <b-card bg-variant="dark" text-variant="light" class="log-viewer">
-    <b-row class="mb-2">
-      <b-col>
-      </b-col>
-      <b-col cols="auto">
-        <b-form-checkbox v-model="autoScroll" switch size="sm">
-          Auto-scroll
-        </b-form-checkbox>
-      </b-col>
-    </b-row>
+  <b-col md="12">
+    <b-card bg-variant="dark" text-variant="light" class="log-viewer">
+      <b-row class="mb-2">
+        <b-col>
+        </b-col>
+        <b-col cols="auto">
+          <b-form-checkbox v-model="autoScroll" switch size="sm">
+            Auto-scroll
+          </b-form-checkbox>
+        </b-col>
+      </b-row>
 
-    <div ref="logContainer" class="log-container bg-black text-light p-2 rounded overflow-auto">
-      <div
-        v-for="(log, index) in logs"
-        :key="index"
-        class="log-entry d-flex flex-wrap align-items-start"
-      >
-        <span class="me-2">[{{ formatTimestampToTime(log.timestamp) }}]</span>
-        <b-badge
-        :variant="levelVariant(log.level)"
-          class="me-2 text-uppercase"
-          style="width: 60px;"
+      <div ref="logContainer" class="log-container bg-black text-light p-2 rounded overflow-auto">
+        <div
+          v-for="(log, index) in logs"
+          :key="index"
+          class="log-entry d-flex flex-wrap align-items-start"
         >
-          {{ log.level }}
-        </b-badge>
-        <span class="message">{{ log.message }}</span>
+          <span class="me-2">[{{ formatTimestampToTime(log.timestamp) }}]</span>
+          <b-badge
+          :variant="levelVariant(log.level)"
+            class="me-2 text-uppercase"
+            style="width: 60px;"
+          >
+            {{ log.level }}
+          </b-badge>
+          <span class="message">{{ log.message }}</span>
+        </div>
       </div>
-    </div>
-  </b-card>
+    </b-card>
+  </b-col>
 </template>
 
 <script setup>
@@ -66,7 +68,11 @@ watch(() => logs.value.length, () => {
 })
 onMounted(() => {
     logsWorker.onmessage = (event) => {
-        logs.value = event.data;
+      if (logs.value.length === 0) {
+        logs.value = event.data
+      } else {
+        logs.value.push(...event.data)
+}
     };
 
     logsWorker.postMessage({ action: 'start' });

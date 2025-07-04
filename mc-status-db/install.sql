@@ -39,3 +39,15 @@ CREATE TABLE logs (
   `level` VARCHAR(10) NOT NULL,
   `timestamp` INT NOT NULL
 );
+
+CREATE TABLE resource_usage (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  memory_used INT NOT NULL,
+  max_memory INT NOT NULL,
+  cpu_usage INT NOT NULL
+)
+
+CREATE TABLE player_uuid (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  uuid varchar(36)
+)

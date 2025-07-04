@@ -1,16 +1,11 @@
-const interval = 1000
+const interval = 5000
 const DEV_IP = "192.168.1.70"
-let lastId = 0
-
 
 self.loop = async () => {
-    await fetch(`http://${DEV_IP}:8000/logs?lastId=${lastId}`)
+    await fetch(`http://${DEV_IP}:8000/resources`)
     .then(r => r.json())
     .then((data)=>{
-        if (data.length > 0){
-            lastId = data[data.length - 1].id
-            self.postMessage(data)
-        }
+        self.postMessage(data)
     })
 
     setTimeout(self.loop, interval);
