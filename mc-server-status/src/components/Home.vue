@@ -2,7 +2,8 @@
     import { onMounted, ref, watch } from 'vue'
     import { useStatusStore } from '@/stores/useStatusStore'
     import Logs from "./Logs.vue"
-    import axios from 'axios'
+    import ResourceGraph from "./ResourceGraph.vue"
+    import PlayerList from './PlayerList.vue'
 
     // Format UNIX timestamp difference to HH:MM:SS
     function formatTimeSince(timestamp) {
@@ -34,63 +35,69 @@
     <div v-if="statusStore.loading">Loading...</div>
     <div v-else-if="statusStore.error">Error: {{ statusStore.error }}</div>
     <div v-else>
-        <b-row class="justify-content-md-center">
-            <b-col xl="5" class="dashboard-cell">
-                <h4>Server Overview</h4>
-                <b-avatar v-if="statusStore.icon" :src="statusStore.icon" square size="64px" style="border: 1px solid black;"></b-avatar>
-                <span style="font-size: 20px; font-weight: 400;margin-left: 10px;">
-                    {{ statusStore.motd }}
-                </span>
+        <b-container fluid class="p-3" style="border-left: 1px solid lightgray;border-right: 1px solid lightgray;height: 100%;"> 
+          <b-card class="mb-3 shadow-sm">
+            <h4 class="mb-2">Server Overview</h4>
+              <b-avatar v-if="statusStore.icon" :src="statusStore.icon" square size="64px" style="border: 1px solid black;"></b-avatar>
+              <span style="font-size: 20px; font-weight: 400;margin-left: 10px;">
+                  {{ statusStore.motd }}
+              </span>
+            <b-row>
+              <b-col md="4">
                 <div :style="{ width: (statusStore.max * 20 + (statusStore.max - 1) * 1) + 'px' }">
-                    <span style="margin-top: 16px; margin-bottom: 0px;">Players Online:</span>
-                    <span style="margin-bottom: 0px; float: right;">{{ statusStore.online }} / {{ statusStore.max }}</span>
-                </div>
-                <svg :width="statusStore.max* 20 + (statusStore.max - 1) * 1" :height="20" xmlns="http://www.w3.org/2000/svg">
-                    <rect
-                    v-for="n in statusStore.max"
-                    :key="n"
-                    :x="(n - 1) * (20 + 1)"
-                    y="0"
-                    :width="20"
-                    :height="20"
-                    :fill="n <= statusStore.online ? '#22c55e' : '#e5e7eb'"
-                    stroke="#111827"
-                    stroke-width="2"
-                    rx="2"
-                    />
-                </svg>
+                      <span style="margin-top: 16px; margin-bottom: 0px;"><strong>Players Online: </strong></span>
+                      <span style="margin-bottom: 0px; float: right;">{{ statusStore.online }} / {{ statusStore.max }}</span>
+                  </div>
+                  <svg :width="statusStore.max* 20 + (statusStore.max - 1) * 1" :height="20" xmlns="http://www.w3.org/2000/svg">
+                      <rect
+                      v-for="n in statusStore.max"
+                      :key="n"
+                      :x="(n - 1) * (20 + 1)"
+                      y="0"
+                      :width="20"
+                      :height="20"
+                      :fill="n <= statusStore.online ? '#22c55e' : '#e5e7eb'"
+                      stroke="#111827"
+                      stroke-width="2"
+                      rx="2"
+                      />
+                  </svg>
+              </b-col>
+              <b-col md="3"><strong>Latency: </strong>{{  Math.round(statusStore.latency * 100) / 100 }} ms</b-col>
+              <b-col md="3">
+                <strong>Status: </strong>
+                <b-badge :class="statusStore.serverOnline ? 'online' : 'offline'" style="font-size:medium; padding-right: 15px;">
+                    {{ statusStore.serverOnline ? '🟢 Online' : '🔴 Offline ' }}
+                </b-badge>
+                <!-- 22c55e -->
+              </b-col>
+              <b-col md="2">
+                <strong>Version: </strong>
+                <b-badge style="background-color: #A72E33 !important; font-size:medium; padding-right: 10px;">{{ statusStore.version }}</b-badge>
+              </b-col>
+            </b-row>
+          </b-card>
+
+          <b-row>
+            <!-- Left: Active Users -->
+            <b-col md="3" class="mb-3">
+              <b-card class="h-100 shadow-sm">
+                  <PlayerList />
+              </b-card>
             </b-col>
-            <b-col xl="3" class="dashboard-cell">
-                <h4>Server Status</h4>
-                  <div class="status-header">
-                    <span class="status-badge" :class="statusStore.serverOnline ? 'online' : 'offline'">
-                    {{ statusStore.serverOnline ? '🟢 Online' : '🔴 Offline' }}
-                    </span>
-                </div>
-                <p>Latency: {{ statusStore.latency }} ms</p>
-                <p>
-                    Version:
-                    <span class="version-badge">{{ statusStore.version }}</span>
-                </p>
+
+            <!-- Right: Charts -->
+            <b-col md="9" class="mb-3" >
+              <b-row class="mb-3">
+                <ResourceGraph />
+              </b-row>
+              <b-row>
+                <Logs />
+              </b-row>
             </b-col>
-        </b-row>
-        <b-row class="justify-content-md-center">
-            <b-col xl="8" class="dashboard-cell">
-                <b-row>
-                    <b-col md="3" v-for="p in statusStore.players" :key="p[1]" style="padding-bottom: 5px;">
-                        <b-avatar
-                            :src="`https://crafatar.com/avatars/${p[1]}?size=64`"
-                            size="32px"
-                            square
-                            class="player-avatar"
-                        />
-                        <span>{{ p[0] }}</span>
-                        <span>{{ formatTimeSince(p[2]) }}</span>
-                    </b-col>
-                </b-row>
-            </b-col>
-        </b-row>
-        <Logs />
+          </b-row>
+          
+          </b-container>
     </div>
 </template>
 
@@ -125,12 +132,11 @@
   color: white;
 }
 
-.status-badge.online {
-  background-color: #22c55e;
+.online {
+  background-color: #22c55e !important;
 }
-
-.status-badge.offline {
-  background-color: #ef4444;
+.offline {
+  background-color: #e5e7eb !important;
 }
 
 .status-body {

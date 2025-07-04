@@ -4,14 +4,14 @@ import Home from './components/Home.vue'
 </script>
 
 <template>
-    <b-container style="border-left: 1px solid lightgray;border-right: 1px solid lightgray;height: 100%;;">
-      <Home msg="You did it!" />
+    <!-- <b-container style="border-left: 1px solid lightgray;border-right: 1px solid lightgray;height: 100%;;"> -->
+      <Home/>
 
       <!-- <nav>
         <RouterLink to="/">Home</RouterLink>
         <RouterLink to="/about">About</RouterLink>
       </nav> -->
-    </b-container>
+    <!-- </b-container> -->
   <!-- <RouterView /> -->
 </template>
 

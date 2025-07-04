@@ -2,6 +2,8 @@
 import { defineStore } from 'pinia'
 import axios from 'axios'
 
+const DEV_IP = "127.0.0.1"
+
 export const useStatusStore = defineStore('status', {
   state: () => ({
     serverOnline: false,
@@ -21,7 +23,7 @@ export const useStatusStore = defineStore('status', {
       this.loading = true
       this.error = null
       try {
-        const response = await axios.get('http://192.168.0.189:8000/status')
+        const response = await axios.get(`http://${DEV_IP}:8000/status`)
         const data = response.data
         // console.log("in store", data.players)
 
